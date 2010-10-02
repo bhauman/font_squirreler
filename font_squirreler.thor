@@ -66,9 +66,9 @@ class FontSquirreler < Thor
   def store_on_s3(font_name)
     AWS::S3::Base.establish_connection!(
                                         :access_key_id     => ENV['AMAZON_ACCESS_KEY_ID'],
-                                        :secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY']
+                                        :Secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY']
                                         )
-    varients = get_varients(font_name)
+    Varients = get_varients(font_name)
     varients.each do |varient|
       files = files_for_font_varient(font_name, varient)
       files.each do |file|
