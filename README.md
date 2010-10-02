@@ -26,7 +26,7 @@ This is "beta but useful" or "betauseful" software.
 
 ## Installation 
 
-    thor install http://github.com/bhauman/font_squirreler/tree/master/font_squirreler.thor?raw=true
+    thor install http://github.com/bhauman/font_squirreler/raw/master/font_squirreler.thor 
 
 ## Usage
 
