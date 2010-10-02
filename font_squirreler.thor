@@ -68,7 +68,7 @@ class FontSquirreler < Thor
                                         :access_key_id     => ENV['AMAZON_ACCESS_KEY_ID'],
                                         :Secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY']
                                         )
-    Varients = get_varients(font_name)
+    varients = get_varients(font_name)
     varients.each do |varient|
       files = files_for_font_varient(font_name, varient)
       files.each do |file|
