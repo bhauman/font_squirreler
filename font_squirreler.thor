@@ -53,9 +53,10 @@ class FontSquirreler < Thor
     varients = get_varients(font_name)
     varients.each do |varient|
       files = files_for_font_varient(font_name, varient)
+      vname = File.basename(files.detect {|x| x.match(/\.css$/) }).gsub('.css', '')
       files.each do |file|
-        FileUtils.mkdir_p("public/webfonts/#{varient.gsub('-','')}")
-        store_path = "public/webfonts/#{varient.gsub('-','')}/#{File.basename file}"
+        FileUtils.mkdir_p("public/webfonts/#{vname}")
+        store_path = "public/webfonts/#{vname}/#{File.basename file}"
         FileUtils.cp(file, store_path)
         puts "stored: #{File.expand_path store_path}"
       end
@@ -66,11 +67,12 @@ class FontSquirreler < Thor
   def store_on_s3(font_name)
     AWS::S3::Base.establish_connection!(
                                         :access_key_id     => ENV['AMAZON_ACCESS_KEY_ID'],
-                                        :Secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY']
+                                        :secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY']
                                         )
     varients = get_varients(font_name)
     varients.each do |varient|
       files = files_for_font_varient(font_name, varient)
+      vname = File.basename(files.detect {|x| x.match(/\.css$/) }).gsub('.css', '')
       files.each do |file|
         options = { :access => :public_read,
           :cache_control => 'public, max-age=31557600',
@@ -78,7 +80,7 @@ class FontSquirreler < Thor
         if file.match /\.css$/
           options = options.merge({ :content_type => 'text/css' })
         end
-        store_path = "webfonts/#{varient.gsub('-','')}/#{File.basename file}"
+        store_path = "webfonts/#{vname}/#{File.basename file}"
         AWS::S3::S3Object.store(store_path, open(file), ENV['S3_FONT_BUCKET'], options)
         puts "stored: http://#{ENV['S3_FONT_BUCKET']}.s3.amazonaws.com/" + store_path
       end
@@ -98,7 +100,7 @@ class FontSquirreler < Thor
   def files_for_font_varient(font_name, varient)
     files = []
     files += Dir[font_path(font_name) + "/#{varient}-webfont*"]
-    files += Dir[font_path(font_name) + "/#{varient.gsub('-','')}.css"]
+    files += Dir[font_path(font_name) + "/#{varient.gsub(/[-_]/,'')}.css"]
   end
   
   def agent
