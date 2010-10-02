@@ -13,7 +13,7 @@ This is "beta but useful" or "betauseful" software.
 
 ## Usage
 
-   thor font_squirreler:search Sans
+    thor font_squirreler:search Sans
 
 Which outputs:
 
@@ -76,7 +76,7 @@ Using the --s3 option will upload the fonts to S3 for you.  You must
 have the environment variables in the following section set in order
 for this to work.
 
-   thor font_squirreler:search Sans --s3
+    thor font_squirreler:search Sans --s3
 
 The script sets the proper headers for caching.
 
@@ -89,7 +89,9 @@ To use s3 you must have the following shell environment variables set.
 
 S3_FONT_BUCKET # the name of the S3 bucket you want to store your
 fonts in
+
 AMAZON_ACCESS_KEY_ID # your amazon access key
+
 AMAZON_SECRET_ACCESS_KEY  # your amazon secret
 
 ## License
