@@ -48,11 +48,33 @@ class FontSquirreler < Thor
     end
   end
 
+  desc "process _zip_file", "process a downloaded fontsquirrel zip"
+  method_options :s3 => false
+  def process(zip_file)
+    filename = File.basename zip_file
+    path = File.join(tmp_dir, filename.gsub('.zip', ''))
+    FileUtils.mkdir_p(path)
+    FileUtils.cp(zip_file, path)
+    inside(path) do |dir|
+      `unzip #{dir}/#{filename}`
+      `rm *html *zip *txt`
+    end
+    font_name = filename.gsub('.zip', '')
+    say "saved " + font_name
+    inline_font(font_name)
+    if options[:s3]
+      store_on_s3(font_name)      
+    else
+      store(font_name)
+    end
+  end
+
   desc "store _font_name", "stores into current project (assumes the presence of a /public directory)"
   def store(font_name)
     varients = get_varients(font_name)
     varients.each do |varient|
       files = files_for_font_varient(font_name, varient)
+      puts files.inspect
       vname = File.basename(files.detect {|x| x.match(/\.css$/) }).gsub('.css', '')
       files.each do |file|
         FileUtils.mkdir_p("public/webfonts/#{vname}")
@@ -100,7 +122,9 @@ class FontSquirreler < Thor
   def files_for_font_varient(font_name, varient)
     files = []
     files += Dir[font_path(font_name) + "/#{varient}-webfont*"]
-    files += Dir[font_path(font_name) + "/#{varient.gsub(/[-_]/,'')}.css"]
+    css_files = Dir[font_path(font_name) + "/*.css"]
+    files << css_files.detect { |x| File.basename(x).match %r{#{ varient.gsub(/[-_]/,'') }}i }
+    # files += Dir[font_path(font_name) + "/#{varient.gsub(/[-_]/,'')}.css"]
   end
   
   def agent
@@ -159,6 +183,8 @@ class FontSquirreler < Thor
       return filename.gsub('.zip', '')
     end    
   end
+
+  
   
   def font_path(font_name)
     File.join(tmp_dir, font_name)
