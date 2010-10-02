@@ -2,8 +2,25 @@
 
 ## Description
 
-This is a Thor script that downloads, base64 encodes and inlines the
-ttf font and then optionally stores the fonts on s3.
+This is a Thor script that install webfonts from
+[http://fontsquirrel.com](http://fontsquirrel.com) locally
+or to s3.
+
+This script is opinionated in that it changes the downloaded
+stylesheets by inlining the TTF font which clears up cross domain
+issues which really helps if you want to host the files on S3 or Cloud
+Front.
+
+This script also splits the given CSS file into separate files for
+each font varient so that you can selectively use each varient at
+will.
+
+The script further changes the filenames and directory scheme to ease
+programatic use of the fonts.
+
+This script doesn't mess with WOFF files because they have to be
+inlined for S3 as well which doubles the file size.  Just kinda
+silly.
 
 This is "beta but useful" or "betauseful" software.  
 
