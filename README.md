@@ -7,8 +7,8 @@ This is a Thor script that install webfonts from
 or to s3.
 
 This script is opinionated in that it changes the downloaded
-stylesheets by inlining the TTF font which clears up cross domain
-issues which really helps if you want to host the files on S3 or Cloud
+stylesheets by inlining the TTF font. This clears up cross domain
+issues and really helps if you want to host the files on S3 or Cloud
 Front.
 
 This script also splits the given CSS file into separate files for
@@ -100,6 +100,20 @@ The script sets the proper headers for caching.
 The fonts are stored under the directory __webfonts__ in the specified
 S3 bucket.
 
+## Cufon
+
+Your milage may vary! I have it setup to create cufon.js files
+for each of the processed fonts.  This is highly dependant upon
+whether you have php, cufon and Fontforge installed.  You also
+probably need to be using a Mac for this to work.
+
+There are environment variables to set for the paths to the executables
+
+    thor font_squirreler:search Sans --s3 --cufon
+
+The above will generate a cufon.js file for the chosen font as well as
+sending it to s3.
+
 ## Environment Variables
 
 To use s3 you must have the following shell environment variables set.
@@ -110,6 +124,8 @@ fonts in
 AMAZON_ACCESS_KEY_ID # your amazon access key
 
 AMAZON_SECRET_ACCESS_KEY  # your amazon secret
+
+To use the cufont conversion 
 
 ## License
 
