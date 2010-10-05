@@ -128,6 +128,7 @@ AMAZON_SECRET_ACCESS_KEY  # your amazon secret
 To use the cufont conversion:
 
 CUFON_CONVERT_PATH # the path to the cufon convert.php executable
+
 FONTFORGE_PATH     # the path to FontForge on a Mac defaults to /Applications/FontForge.app/Contents/MacOS/FontForge
 
 ## License
