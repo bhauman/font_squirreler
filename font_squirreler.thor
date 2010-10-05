@@ -16,10 +16,36 @@ class FontSquirreler < Thor
     font_name = download_font(font_link) if font_link
     say "saved " + font_name
     inline_font(font_name)
+    cufon_font(font_name)
     if options[:s3]
       store_on_s3(font_name)      
     else
       store(font_name)
+    end
+  end
+
+  desc "cufon_font _font_name",  "generates the cufon js for the varients of this font"
+  def cufon_font(font_name)
+    varients = get_varients(font_name)
+    say varients.inspect
+    varients.each do |varient| 
+      say files_for_font_varient(font_name, varient).inspect
+      f = files_for_font_varient(font_name, varient).detect { |x| x.match /\.ttf$/ }
+      css = files_for_font_varient(font_name, varient).detect { |x| x.match /\.css$/ }
+      name = File.basename(css).split('.').first
+      
+      js_path = File.join(font_path(font_name), 'varients', varient, name + '.js')
+      `php /Users/bhauman/workspace/cufon/generate/convert.php --fontforge /Applications/FontForge.app/Contents/MacOS/FontForge -u "U+??" #{f} 1> #{js_path}.temp`
+       say "generating #{js_path}.temp"
+       say "fixing font family name"
+       font_js = File.open(%{#{js_path}.temp}).read
+       font_js.sub!(%r{"font-family"\:"[^"]*"}, %{"font-family":"#{name}"})
+       new_file = File.open(js_path, 'w')
+       font_js.each(':') do |chunk|
+         new_file.write chunk
+       end
+       new_file.close
+       FileUtils.rm(js_path + '.temp')
     end
   end
 
@@ -42,10 +68,26 @@ class FontSquirreler < Thor
     content.split('@font-face').each do |part|
       if !part.match(%r{/\*})
         name = part.match(%r{font-family:\s'(.*)'})[1]
-        puts font_path(font_name)
-        File.open(File.join(font_path(font_name), "#{name}.css"), 'w').write('@font-face' + part)
+        act_font_file_name = part.match(%r{src:\surl\('([^\)]*)\.eot'\)})[1]
+        var_dir = fonts_varient_directory(font_name, name, act_font_file_name)
+
+        new_file = File.open(File.join(var_dir, "#{name}.css"), 'w')
+        new_file.write('@font-face' + part)
+        new_file.close
       end
     end
+  end
+
+  def fonts_varient_directory(font_name, name, act_font_names)
+      dir = File.join( font_path(font_name),'varients', name )    
+      FileUtils.mkdir_p dir
+      ffiles = Dir[font_path(font_name) + "/#{act_font_names}.ttf"]
+      ffiles += Dir[font_path(font_name) + "/#{act_font_names}.eot"]
+      ffiles += Dir[font_path(font_name) + "/#{act_font_names}.svg"]
+      ffiles.each do |f|
+        FileUtils.cp(ffiles, dir)
+      end
+      dir
   end
 
   desc "process _zip_file", "process a downloaded fontsquirrel zip"
@@ -62,6 +104,7 @@ class FontSquirreler < Thor
     font_name = filename.gsub('.zip', '')
     say "saved " + font_name
     inline_font(font_name)
+    cufon_font(font_name)
     if options[:s3]
       store_on_s3(font_name)      
     else
@@ -112,19 +155,12 @@ class FontSquirreler < Thor
   protected
   
   def get_varients(font_name)
-    col = { }
-    Dir[font_path(font_name) + '/*webfont*'].each do |file|
-      col[File.basename(file).gsub(/-webfont.*/, '')] = true
-    end
-    col.keys
+    Dir[font_path(font_name) + '/varients/*'].collect {|x| File.basename(x)}
   end
 
   def files_for_font_varient(font_name, varient)
-    files = []
-    files += Dir[font_path(font_name) + "/#{varient}-webfont*"]
-    css_files = Dir[font_path(font_name) + "/*.css"]
-    files << css_files.detect { |x| File.basename(x).match %r{#{ varient.gsub(/[-_]/,'') }}i }
-    # files += Dir[font_path(font_name) + "/#{varient.gsub(/[-_]/,'')}.css"]
+    say font_path(font_name) + '/varients/#{varient}/*'
+    Dir[font_path(font_name) + "/varients/#{varient}/*"]
   end
   
   def agent
