@@ -125,7 +125,7 @@ AMAZON_ACCESS_KEY_ID # your amazon access key
 
 AMAZON_SECRET_ACCESS_KEY  # your amazon secret
 
-To use the cufont conversion:
+To use the cufon conversion:
 
 CUFON_CONVERT_PATH # the path to the cufon convert.php executable
 
